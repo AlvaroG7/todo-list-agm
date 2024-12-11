@@ -1,86 +1,42 @@
-// Import required modules
-const express = require("express");
-const bodyParser = require("body-parser");
-const date = require(__dirname + "/date.js");
+//jshint esversion:6
 
-// date.js
+// Export a function named 'getDate' which can be used to obtain a string representation
+// of the current date with a full format including the day of the week, the month, and the day of the month.
+exports.getDate = function () {
 
-exports.getDate = function() {
+  // Create a new Date object that represents the current date and time.
   const today = new Date();
 
+  // Define an 'options' object that specifies how the date should be formatted.
+  // - 'weekday': "long" means the full name of the weekday (e.g., Monday)
+  // - 'day': "numeric" means the numeric day of the month (e.g., 31)
+  // - 'month': "long" means the full name of the month (e.g., December)
   const options = {
     weekday: "long",
     day: "numeric",
-    month: "long",
+    month: "long"
   };
 
+  // Return the current date as a string formatted according to the locale 'en-US'
+  // and the options defined above. The 'toLocaleDateString' method is used to
+  // format the date with respect to a particular locale, in this case, U.S. English.
   return today.toLocaleDateString("en-US", options);
 };
 
-// Initialize app
-const app = express();
-app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
+// Export another function named 'getDay' which provides a string representation
+// of the current day of the week.
+exports.getDay = function () {
 
-// Data storage using Maps
-const items = new Map();
-const workItems = new Map();
+  // Reuse the 'today' variable from above, creating a new Date object for the current date and time.
+  const today = new Date();
 
-// Seed initial data
-items.set("1", "Buy Food");
-items.set("2", "Cook Food");
-items.set("3", "Eat Food");
+  // Define a simpler 'options' object for this function, which only specifies the 'weekday'
+  // property to be "long", meaning it will only show the full name of the weekday.
+  const options = {
+    weekday: "long"
+  };
 
-// Root route (Main List)
-app.get("/", (req, res) => {
-  const day = date.getDate();
-  const itemList = Array.from(items, ([uid, text]) => ({ uid, text }));
-  res.render("list", { listTitle: day, newListItems: itemList });
-});
-
-// Work List route
-app.get("/work", (req, res) => {
-  const itemList = Array.from(workItems, ([uid, text]) => ({ uid, text }));
-  res.render("list", { listTitle: "Work List", newListItems: itemList });
-});
-
-// Add new item
-app.post("/", (req, res) => {
-  const itemText = req.body.newItem;
-  const listName = req.body.listName;
-  const uid = Date.now().toString(); // Unique ID
-
-  if (listName === "Work") {
-    workItems.set(uid, itemText);
-    res.redirect("/work");
-  } else {
-    items.set(uid, itemText);
-    res.redirect("/");
-  }
-});
-
-// Delete an item
-app.post("/delete", (req, res) => {
-  const uidToDelete = req.body.uid;
-  const listName = req.body.listName;
-
-  if (listName === "Work") {
-    workItems.delete(uidToDelete);
-    res.redirect("/work");
-  } else {
-    items.delete(uidToDelete);
-    res.redirect("/");
-  }
-});
-
-// About route
-app.get("/about", (req, res) => {
-  res.render("about");
-});
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server started on port", PORT);
-});
+  // Return the current day as a string formatted to the 'en-US' locale, using only
+  // the 'weekday' part of the 'options' object. This results in just the full weekday name.
+  return today.toLocaleDateString("en-US", options);
+};
